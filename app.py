@@ -25,7 +25,7 @@ img_file_buffer = st.camera_input("Show your hand")
 
 output_text = st.session_state.get("output_text", "")
 
-if img_filebuffer:
+if img_file_buffer:
     image = Image.open(img_file_buffer)
     frame = np.array(image)
     frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
@@ -51,4 +51,5 @@ if img_filebuffer:
     st.session_state["output_text"] = output_text
 
     st.subheader(f"Text: {output_text}")
+
 
