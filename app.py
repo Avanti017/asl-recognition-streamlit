@@ -2,6 +2,10 @@ import os
 
 # ---- FORCE HEADLESS OPENCV (Streamlit Cloud fix) ----
 os.environ["OPENCV_VIDEOIO_PRIORITY_MSMF"] = "0"
+
+# ---- FORCE MEDIAPIPE CPU (Streamlit Cloud FIX) ----
+os.environ["MEDIAPIPE_DISABLE_GPU"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 os.environ["QT_QPA_PLATFORM"] = "offscreen"
 
 import streamlit as st
@@ -184,6 +188,7 @@ st.write(st.session_state.output_text)
 
 if st.button("Clear text"):
     st.session_state.output_text = ""
+
 
 
 
