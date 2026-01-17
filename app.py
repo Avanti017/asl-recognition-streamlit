@@ -1,5 +1,3 @@
-import os
-os.system("pip uninstall -y opencv-python opencv-contrib-python")
 import streamlit as st
 import cv2
 import mediapipe as mp
@@ -180,4 +178,5 @@ st.write(st.session_state.output_text)
 
 if st.button("Clear text"):
     st.session_state.output_text = ""
+
 
