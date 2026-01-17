@@ -57,6 +57,7 @@ hands = mp_hands.Hands(
     max_num_hands=1,
     min_detection_confidence=0.7,
     min_tracking_confidence=0.7,
+    model_complexity=0 # Prevents from using GPU which crashes MediaPipe
 )
 
 # ---------------- HELPERS ----------------
@@ -188,6 +189,7 @@ st.write(st.session_state.output_text)
 
 if st.button("Clear text"):
     st.session_state.output_text = ""
+
 
 
 
