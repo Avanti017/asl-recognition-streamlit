@@ -6,7 +6,7 @@ import joblib
 from collections import deque 
 from PIL import Image
 
-st.tite("ASL Recognition Demo")
+st.title("ASL Recognition Demo")
 
 model = joblib.load("asl_model.pkl")
 mp_hands = mp.solutions.hands
@@ -51,3 +51,4 @@ if img_filebuffer:
     st.session_state["output_text"] = output_text
 
     st.subheader(f"Text: {output_text}")
+
