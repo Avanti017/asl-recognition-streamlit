@@ -1,3 +1,9 @@
+import os
+
+# ---- FORCE HEADLESS OPENCV (Streamlit Cloud fix) ----
+os.environ["OPENCV_VIDEOIO_PRIORITY_MSMF"] = "0"
+os.environ["QT_QPA_PLATFORM"] = "offscreen"
+
 import streamlit as st
 import cv2
 import mediapipe as mp
@@ -178,5 +184,6 @@ st.write(st.session_state.output_text)
 
 if st.button("Clear text"):
     st.session_state.output_text = ""
+
 
 
