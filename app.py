@@ -1,12 +1,10 @@
 import os
 
-# ---- FORCE HEADLESS OPENCV (Streamlit Cloud fix) ----
-os.environ["OPENCV_VIDEOIO_PRIORITY_MSMF"] = "0"
-
-# ---- FORCE MEDIAPIPE CPU (Streamlit Cloud FIX) ----
+# ---------------- FORCE CPU / HEADLESS ----------------
 os.environ["MEDIAPIPE_DISABLE_GPU"] = "1"
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 os.environ["QT_QPA_PLATFORM"] = "offscreen"
+os.environ["OPENCV_VIDEOIO_PRIORITY_MSMF"] = "0"
 
 import streamlit as st
 import cv2
@@ -24,7 +22,11 @@ NO_HAND_FRAMES_REQUIRED = 10
 BACKSPACE_FRAMES_REQUIRED = 10
 MAX_CHARS = 19
 
-# ---------------- SESSION STATE INIT ----------------
+# ---------------- STREAMLIT PAGE ----------------
+st.set_page_config(page_title="ASL Live Recognition", layout="centered")
+st.title("✋ ASL Live ASL Recognition")
+
+# ---------------- SESSION STATE ----------------
 defaults = {
     "output_text": "",
     "last_prediction": None,
@@ -41,24 +43,8 @@ for k, v in defaults.items():
     if k not in st.session_state:
         st.session_state[k] = v
 
-# ---------------- STREAMLIT UI ----------------
-st.set_page_config(page_title="ASL Live Recognition", layout="centered")
-st.title("✋ ASL Live Recognition (Webcam)")
-
 # ---------------- LOAD MODEL ----------------
 model = joblib.load("asl_model.pkl")
-
-# ---------------- MEDIAPIPE SETUP ----------------
-mp_hands = mp.solutions.hands
-mp_draw = mp.solutions.drawing_utils
-
-hands = mp_hands.Hands(
-    static_image_mode=False,
-    max_num_hands=1,
-    min_detection_confidence=0.7,
-    min_tracking_confidence=0.7,
-    model_complexity=0 # Prevents from using GPU which crashes MediaPipe
-)
 
 # ---------------- HELPERS ----------------
 def is_open_hand(handLms):
@@ -78,21 +64,35 @@ def is_open_hand(handLms):
     spread = abs(handLms.landmark[8].x - handLms.landmark[20].x)
     return spread >= 0.12
 
-
 # ---------------- VIDEO PROCESSOR ----------------
 class ASLProcessor(VideoProcessorBase):
+    def __init__(self):
+        self.mp_hands = mp.solutions.hands
+        self.mp_draw = mp.solutions.drawing_utils
+
+        # ⚠️ MUST be created here (not globally)
+        self.hands = self.mp_hands.Hands(
+            static_image_mode=False,
+            max_num_hands=1,
+            min_detection_confidence=0.7,
+            min_tracking_confidence=0.7,
+            model_complexity=0  # CPU only (prevents EGL crash)
+        )
+
     def recv(self, frame):
         img = frame.to_ndarray(format="bgr24")
         imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
-        results = hands.process(imgRGB)
+        results = self.hands.process(imgRGB)
 
         if results.multi_hand_landmarks:
             st.session_state.no_hand_frames = 0
             st.session_state.space_locked = False
 
             handLms = results.multi_hand_landmarks[0]
-            mp_draw.draw_landmarks(img, handLms, mp_hands.HAND_CONNECTIONS)
+            self.mp_draw.draw_landmarks(
+                img, handLms, self.mp_hands.HAND_CONNECTIONS
+            )
 
             landmarks = []
             for lm in handLms.landmark:
@@ -175,22 +175,16 @@ class ASLProcessor(VideoProcessorBase):
 
         return av.VideoFrame.from_ndarray(img, format="bgr24")
 
-
-# ---------------- START WEBRTC ----------------
+# ---------------- START CAMERA ----------------
 webrtc_streamer(
     key="asl-live",
     video_processor_factory=ASLProcessor,
     media_stream_constraints={"video": True, "audio": False},
 )
 
-# ---------------- OUTPUT TEXT ----------------
+# ---------------- OUTPUT ----------------
 st.subheader("Recognized Text")
 st.write(st.session_state.output_text)
 
 if st.button("Clear text"):
     st.session_state.output_text = ""
-
-
-
-
-
