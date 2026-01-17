@@ -3,7 +3,7 @@ import cv2
 import mediapipe as mp
 import numpy as np
 import joblib
-import collections import deque 
+from collections import deque 
 from PIL import Image
 
 st.tite("ASL Recognition Demo")
@@ -49,4 +49,5 @@ if img_filebuffer:
     output_text += final_prediction
     output_text = output_text[-19:]
     st.session_state["output_text"] = output_text
+
     st.subheader(f"Text: {output_text}")
