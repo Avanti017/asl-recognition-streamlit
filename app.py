@@ -38,18 +38,19 @@ if img_file_buffer:
 
         landmarks = []
 
-    for lm in handLms.landmark:
-        landmarks.extend([lm.x, lm.y, lm.z])
-    X = np.array(landmarks).reshape(1,-1)
-    prediction = model.predict(X)[0]
-    prediction_buffer.append[prediction]
+        for lm in handLms.landmark:
+            landmarks.extend([lm.x, lm.y, lm.z])
+        X = np.array(landmarks).reshape(1,-1)
+        prediction = model.predict(X)[0]
+        prediction_buffer.append[prediction]
+        
+        final_prediction = max(set(prediction_buffer),
+                                key=prediction_buffer.count)
+        output_text += final_prediction
+        output_text = output_text[-19:]
     
-    final_prediction = max(set(prediction_buffer),
-                            key=prediction_buffer.count)
-    output_text += final_prediction
-    output_text = output_text[-19:]
     st.session_state["output_text"] = output_text
-
     st.subheader(f"Text: {output_text}")
+
 
 
