@@ -1,3 +1,5 @@
+import os
+os.environ["MEDIAPIPE_DISABLE_GPU"] = "1"
 import streamlit as st
 import cv2
 import mediapipe as mp
